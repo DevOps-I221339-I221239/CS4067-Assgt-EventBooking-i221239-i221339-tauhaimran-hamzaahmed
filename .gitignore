@@ -1,0 +1,4 @@
+booking-service/.env
+event-service/.env
+user-service/.env
+notification-service/.env
