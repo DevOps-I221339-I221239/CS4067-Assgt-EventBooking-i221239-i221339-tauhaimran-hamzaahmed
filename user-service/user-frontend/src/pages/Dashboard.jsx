@@ -1,147 +1,209 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./styles/Dashboard.css"
 
 const BookingDashboard = () => {
-  const [bookings, setBookings] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [ticketCounts, setTicketCounts] = useState({}); // Store selected ticket counts
-  const navigate = useNavigate();
+    const [bookings, setBookings] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [ticketCounts, setTicketCounts] = useState({}); // Store selected ticket counts
+    const navigate = useNavigate();
 
-  // Fetch Bookings & Events on Page Load
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await axios.get("http://localhost:5001/bookings");
-        setBookings(res.data);
-      } catch (err) {
-        console.error("Error fetching bookings:", err);
-      }
+    // Fetch Bookings & Events on Page Load
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const res = await axios.get("http://localhost:5001/bookings");
+                setBookings(res.data);
+            } catch (err) {
+                console.error("Error fetching bookings:", err);
+            }
+        };
+
+        const fetchEvents = async () => {
+            try {
+                const res = await axios.get("http://localhost:5002/events");
+                setEvents(res.data);
+            } catch (err) {
+                console.error("Error fetching events:", err);
+            }
+        };
+
+        fetchBookings();
+        fetchEvents();
+    }, []);
+
+    // Handle ticket count change
+    const handleTicketChange = (eventId, value) => {
+        setTicketCounts({ ...ticketCounts, [eventId]: value });
     };
 
-    const fetchEvents = async () => {
-      try {
-        const res = await axios.get("http://localhost:5002/events");
-        setEvents(res.data);
-      } catch (err) {
-        console.error("Error fetching events:", err);
-      }
+    const getUserNameByID = async (userId) => {
+        try {
+            const res = await axios.get(`http://localhost:5004/users/${userId}`);
+            return res.data.name;  // ✅ Access the `name` field from response
+        } catch (err) {
+            console.error("Error fetching user:", err);
+            return "Unknown User"; // Default name if request fails
+        }
     };
 
-    fetchBookings();
-    fetchEvents();
-  }, []);
+    const getEventNameByID = async (eventId) => {
+        try {
+            const res = await axios.get(`http://localhost:5002/events/${eventId}`);
+            return res.data.title;  // ✅ Access the `title` field from response
+        } catch (err) {
+            console.error("Error fetching event:", err);
+            return "Unknown Event"; // Default name if request fails
+        }
+    };
 
-  // Handle ticket count change
-  const handleTicketChange = (eventId, value) => {
-    setTicketCounts({ ...ticketCounts, [eventId]: value });
-  };
+    const decodeToken = (token) => {
+        try {
+            if (!token) throw new Error("No token provided");
 
-  const decodeToken = (token) => {
-    try {
-      return JSON.parse(atob(token.split(".")[1]));
-    } catch (error) {
-      console.error("Invalid or missing token:", error);
-      return null;
-    }
-  };
-  
-  const createBooking = async (eventId) => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("User not authenticated");
+            const parts = token.split(".");
+            if (parts.length !== 3) throw new Error("Invalid token format");
 
-        const decoded = decodeToken(token);
-        if (!decoded || !decoded.userId) throw new Error("Invalid token format");
+            const decodedPayload = JSON.parse(atob(parts[1])); // Decode JWT payload
+            return decodedPayload;
+        } catch (error) {
+            console.error("Error decoding token:", error.message);
+            return null; // Return `null` if the token is invalid
+        }
+    };
 
-        const numTickets = ticketCounts[eventId] || 1; // Default to 1 if not selected
-        // console.log("Decoded User ID:", decoded.userId);
-        // console.log("Event ID:", eventId);
-        // console.log("Number of Tickets:", numTickets);
+    const refreshBookings = async () => {
+        try {
+            const res = await axios.get("http://localhost:5001/bookings");
 
-        const res = await axios.post("http://localhost:5001/bookings", {
-            userId: decoded.userId,
-            eventId: eventId,
-            numTickets: numTickets // Send the selected ticket count
-        }, {
-            headers: { Authorization: `Bearer ${token}` } // ✅ Send JWT in headers
-        });
+            // Fetch user names and event names asynchronously
+            const updatedBookings = await Promise.all(res.data.map(async (booking) => {
+                const userName = await getUserNameByID(booking.userId);
+                const eventName = await getEventNameByID(booking.eventId);
 
-        setBookings([...bookings, res.data]);
-    } catch (err) {
-        console.error("Error creating booking:", err.message);
-    }
-  };
+                return { ...booking, userName, eventName };
+            }));
 
-  return (
-    <div>
-      <h2>Booking Management Dashboard</h2>
-      <button onClick={() => navigate("/login")}>Logout</button>
+            setBookings(updatedBookings); // ✅ Update state in one call
+        } catch (err) {
+            console.error("Error fetching bookings:", err);
+        }
+    };
 
-      <h3>Available Events</h3>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Location</th>
-            <th>Seats</th>
-            <th>Price</th>
-            <th>Tickets</th>
-            <th>Book</th>
-          </tr>
-        </thead>
-        <tbody>
-          {events.map((event) => (
-            <tr key={event._id}>
-              <td>{event.title}</td>
-              <td>{new Date(event.date).toLocaleDateString()}</td>
-              <td>{event.location}</td>
-              <td>{event.availableSeats}</td>
-              <td>${event.price}</td>
-              <td>
-                <select
-                  value={ticketCounts[event._id] || 1}
-                  onChange={(e) => handleTicketChange(event._id, parseInt(e.target.value))}
-                >
-                  {[...Array(event.availableSeats > 10 ? 10 : event.availableSeats).keys()].map((num) => (
-                    <option key={num + 1} value={num + 1}>
-                      {num + 1}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>
-                <button onClick={() => createBooking(event._id)}>Book</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    const createBooking = async (eventId) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not authenticated");
 
-      <h3>Your Bookings</h3>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>User ID</th>
-            <th>Event ID</th>
-            <th>Tickets</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((booking) => (
-            <tr key={booking.id}>
-              <td>{booking.userId}</td>
-              <td>{booking.eventId}</td>
-              <td>{booking.numTickets}</td>
-              <td>{booking.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+            const decoded = decodeToken(token);
+            if (!decoded || !decoded.userId) throw new Error("Invalid token format");
+            console.log("Decoded Token:", decoded);
+
+            const numTickets = ticketCounts[eventId] || 1; // Default to 1 if not selected
+            // console.log("Decoded User ID:", decoded.userId);
+            // console.log("Event ID:", eventId);
+            // console.log("Number of Tickets:", numTickets);
+
+            const res = await axios.post("http://localhost:5001/bookings", {
+                userId: decoded.userId,
+                eventId: eventId,
+                numTickets: numTickets // Send the selected ticket count
+            }, {
+                headers: { Authorization: `Bearer ${token}` } // ✅ Send JWT in headers
+            });
+
+            const userName = getUserNameByID(decoded.userId);
+            const eventName = events.find(event => event._id === eventId).title;
+
+            const booking = {
+                ...res.data,
+                userName: userName,
+                eventName: eventName
+            };
+
+            console.log("Booking created:", booking)
+
+            refreshBookings();
+        } catch (err) {
+            console.error("Error creating booking:", err.message);
+        }
+    };
+
+    useEffect(() => {
+        refreshBookings();
+    }, []);
+
+    return (
+        <div className="booking-dashboard">
+            <h2 className="dashboard-title">Booking Management Dashboard</h2>
+            {/* <button className="logout-button" onClick={() => navigate("/login")}>Logout</button> */}
+
+            <h3 className="section-title">Available Events</h3>
+            <table className="events-table" border="1">
+                <thead className="table-header">
+                    <tr>
+                        <th className="header-cell">Title</th>
+                        <th className="header-cell">Date</th>
+                        <th className="header-cell">Location</th>
+                        <th className="header-cell">Seats</th>
+                        <th className="header-cell">Price</th>
+                        <th className="header-cell">Tickets</th>
+                        <th className="header-cell">Book</th>
+                    </tr>
+                </thead>
+                <tbody className="table-body">
+                    {events.map((event) => (
+                        <tr className="event-row" key={event._id}>
+                            <td className="event-cell">{event.title}</td>
+                            <td className="event-cell">{new Date(event.date).toLocaleDateString()}</td>
+                            <td className="event-cell">{event.location}</td>
+                            <td className="event-cell">{event.availableSeats}</td>
+                            <td className="event-cell">${event.price}</td>
+                            <td className="event-cell">
+                                <select
+                                    className="ticket-select"
+                                    value={ticketCounts[event._id] || 1}
+                                    onChange={(e) => handleTicketChange(event._id, parseInt(e.target.value))}
+                                >
+                                    {[...Array(event.availableSeats > 10 ? 10 : event.availableSeats).keys()].map((num) => (
+                                        <option className="ticket-option" key={num + 1} value={num + 1}>
+                                            {num + 1}
+                                        </option>
+                                    ))}
+                                </select>
+                            </td>
+                            <td className="event-cell">
+                                <button className="book-button" onClick={() => createBooking(event._id)}>Book</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <h3 className="section-title">Your Bookings</h3>
+            <table className="bookings-table" border="1">
+                <thead className="table-header">
+                    <tr>
+                        <th className="header-cell">User Name</th>
+                        <th className="header-cell">Event Name</th>
+                        <th className="header-cell">Tickets</th>
+                        <th className="header-cell">Status</th>
+                    </tr>
+                </thead>
+                <tbody className="table-body">
+                    {bookings.map((booking) => (
+                        <tr className="booking-row" key={booking.id}>
+                            <td className="booking-cell">{booking.userName}</td>
+                            <td className="booking-cell">{booking.eventName}</td>
+                            <td className="booking-cell">{booking.numTickets}</td>
+                            <td className="booking-cell">{booking.status}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 };
 
 export default BookingDashboard;

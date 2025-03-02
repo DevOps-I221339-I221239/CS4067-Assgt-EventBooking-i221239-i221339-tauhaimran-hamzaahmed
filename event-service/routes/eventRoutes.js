@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Event = require("../models/Events"); // ✅ Import the Event model
+const Event = require("../models/Events");
 
 // Create a new event
 async function createEvent(req, res) {
   try {
     const event = await Event.create(req.body);
+    console.log(`Event created with ID: ${event._id}`);
     res.status(201).json(event);
   } catch (error) {
+    console.error(`Error creating event: ${error.message}`);
     res.status(400).json({ message: error.message });
   }
 }
@@ -16,21 +18,26 @@ async function createEvent(req, res) {
 async function getAllEvents(req, res) {
   try {
     const events = await Event.find();
+    console.log(`Retrieved ${events.length} events`);
     res.json(events);
   } catch (error) {
+    console.error(`Error retrieving events: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 }
 
-// Get a single event by ID
+// Get a single event by ID 
 async function getEventById(req, res) {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) {
+      console.log(`Event not found with ID: ${req.params.id}`);
       return res.status(404).json({ message: "Event not found" });
     }
+    console.log(`Retrieved event with ID: ${req.params.id}`);
     res.json(event);
   } catch (error) {
+    console.error(`Error retrieving event ${req.params.id}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 }
@@ -44,10 +51,13 @@ async function updateEvent(req, res) {
       { new: true, runValidators: true }
     );
     if (!event) {
+      console.log(`Event not found with ID: ${req.params.id}`);
       return res.status(404).json({ message: "Event not found" });
     }
+    console.log(`Updated event with ID: ${req.params.id}`);
     res.json(event);
   } catch (error) {
+    console.error(`Error updating event ${req.params.id}: ${error.message}`);
     res.status(400).json({ message: error.message });
   }
 }
@@ -57,10 +67,13 @@ async function deleteEvent(req, res) {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
     if (!event) {
+      console.log(`Event not found with ID: ${req.params.id}`);
       return res.status(404).json({ message: "Event not found" });
     }
+    console.log(`Deleted event with ID: ${req.params.id}`);
     res.json({ message: "Event deleted successfully" });
   } catch (error) {
+    console.error(`Error deleting event ${req.params.id}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 }

@@ -12,6 +12,15 @@ app.use(morgan("dev"));
 const eventRoutes = require("./routes/eventRoutes");
 app.use("/events", eventRoutes);
 
+const clearDatabase = async () => {
+    const collections = await mongoose.connection.db.collections();
+    for (let collection of collections) {
+        await collection.deleteMany({}); // Clears all documents
+    }
+
+    console.log("Database cleared!");
+};
+
 // Sample route
 app.get("/", (req, res) => {
     res.send({ message: "Event Service is running!" });
@@ -24,4 +33,6 @@ mongoose.connection.once("open", () => {
     app.listen(PORT, () => {
         console.log(`Event Service running on port ${PORT}`);
     });
+    // clearDatabase();
 });
+

@@ -11,18 +11,18 @@ router.get("/", (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-        const user = await User.findByPk(req.params.id); // Use Sequelize findByPk()
+        const user = await User.findByPk(req.params.id);
         if (!user) return res.status(404).json({ error: "User not found" });
-
-        res.json({ id: user.id, email: user.email });
+        res.json({ id: user.id, name: user.name, email: user.email });
     } catch (error) {
+        console.error("[User Service] Error fetching user:", error.message);
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
 router.post("/signup", async (req, res) => {
     try {
-        const { name, email, password, type } = req.body; // ✅ Change `userType` to `type`
-        console.log(type); // Debugging
+        const { name, email, password, type } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ where: { email } });
@@ -33,14 +33,13 @@ router.post("/signup", async (req, res) => {
 
         res.status(201).json({ message: "User registered successfully", user: newUser });
     } catch (error) {
+        console.error("[User Service] Error during signup:", error.message);
         res.status(500).json({ error: "Internal server error" });
-        console.log(error);
     }
 });
 
 
 router.post("/login", async (req, res) => {
-    // Handle user login
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ where: { email } });
@@ -60,6 +59,7 @@ router.post("/login", async (req, res) => {
 
         res.json({ token });
     } catch (error) {
+        console.error("[User Service] Error during login:", error.message);
         res.status(500).json({ error: "Internal server error" });
     }
 });

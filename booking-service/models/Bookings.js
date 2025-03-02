@@ -19,6 +19,14 @@ const Booking = sequelize.define("Booking", {
         type: DataTypes.STRING,
         defaultValue: "PENDING",
     },
+    numTickets: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    bookingDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
 }, { timestamps: true });
 
 module.exports = Booking;
