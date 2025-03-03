@@ -18,7 +18,6 @@ The platform consists of four microservices:
 ✔️ **Booking system** (ticket reservations)  
 ✔️ **Email notifications via RabbitMQ**  
 ✔️ **Microservices communication using REST & Message Queues**  
-✔️ **Containerized with Docker & Docker Compose**  
 
 ## 🛠️ Tech Stack  
 - **Backend:** Node.js, Express, Sequelize/Mongoose  
@@ -26,7 +25,6 @@ The platform consists of four microservices:
 - **Messaging Queue:** RabbitMQ  
 - **Authentication:** JWT  
 - **API Documentation:** Swagger/OpenAPI  
-- **Deployment:** Docker, Kubernetes  
 
 ## 📂 Folder Structure  
 │── /event-service # Event Management Service
