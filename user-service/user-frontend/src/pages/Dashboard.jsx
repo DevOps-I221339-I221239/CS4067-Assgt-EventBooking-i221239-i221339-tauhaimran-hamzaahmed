@@ -7,6 +7,7 @@ const BookingDashboard = () => {
     const [bookings, setBookings] = useState([]);
     const [events, setEvents] = useState([]);
     const [ticketCounts, setTicketCounts] = useState({}); // Store selected ticket counts
+    const [editingBooking, setEditingBooking] = useState(null); // Track booking being edited
     const navigate = useNavigate();
 
     // Fetch Bookings & Events on Page Load
@@ -101,9 +102,6 @@ const BookingDashboard = () => {
             console.log("Decoded Token:", decoded);
 
             const numTickets = ticketCounts[eventId] || 1; // Default to 1 if not selected
-            // console.log("Decoded User ID:", decoded.userId);
-            // console.log("Event ID:", eventId);
-            // console.log("Number of Tickets:", numTickets);
 
             const res = await axios.post("http://localhost:5001/bookings", {
                 userId: decoded.userId,
@@ -127,6 +125,43 @@ const BookingDashboard = () => {
             refreshBookings();
         } catch (err) {
             console.error("Error creating booking:", err.message);
+        }
+    };
+
+    // Update booking tickets
+    const updateBooking = async (bookingId, newTickets) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not authenticated");
+
+            await axios.put(`http://localhost:5001/bookings/${bookingId}`, {
+                numTickets: newTickets
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setEditingBooking(null);
+            refreshBookings();
+        } catch (err) {
+            console.error("Error updating booking:", err.message);
+        }
+    };
+
+    // Cancel/delete booking
+    const cancelBooking = async (bookingId) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not authenticated");
+
+            // console.log("Booking ID:", bookingId)
+
+            await axios.delete(`http://localhost:5001/bookings/${bookingId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            refreshBookings();
+        } catch (err) {
+            console.error("Error canceling booking:", err.message);
         }
     };
 
@@ -189,6 +224,7 @@ const BookingDashboard = () => {
                         <th className="header-cell">Event Name</th>
                         <th className="header-cell">Tickets</th>
                         <th className="header-cell">Status</th>
+                        <th className="header-cell">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="table-body">
@@ -196,8 +232,44 @@ const BookingDashboard = () => {
                         <tr className="booking-row" key={booking.id}>
                             <td className="booking-cell">{booking.userName}</td>
                             <td className="booking-cell">{booking.eventName}</td>
-                            <td className="booking-cell">{booking.numTickets}</td>
+                            <td className="booking-cell">
+                                {editingBooking === booking.id ? (
+                                    <select
+                                        value={ticketCounts[booking.id] || booking.numTickets}
+                                        onChange={(e) => handleTicketChange(booking.id, parseInt(e.target.value))}
+                                    >
+                                        {[...Array(10).keys()].map((num) => (
+                                            <option key={num + 1} value={num + 1}>
+                                                {num + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    booking.numTickets
+                                )}
+                            </td>
                             <td className="booking-cell">{booking.status}</td>
+                            <td className="booking-cell">
+                                {editingBooking === booking.id ? (
+                                    <>
+                                        <button className="create-button" onClick={() => updateBooking(booking.id, ticketCounts[booking.id])}>
+                                            Save
+                                        </button>
+                                        <button className="create-button" onClick={() => setEditingBooking(null)}>
+                                            Cancel
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button className="create-button" onClick={() => setEditingBooking(booking.id)}>
+                                            Edit
+                                        </button>
+                                        <button className="create-button" onClick={() => cancelBooking(booking.id)}>
+                                            Cancel
+                                        </button>
+                                    </>
+                                )}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

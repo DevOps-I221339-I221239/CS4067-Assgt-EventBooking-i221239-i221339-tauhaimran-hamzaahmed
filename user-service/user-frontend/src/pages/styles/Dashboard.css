@@ -107,3 +107,6 @@
     background-color: #218838;
   }
   
+  .booking-cell button {
+    margin: 0.5rem 1rem
+  }

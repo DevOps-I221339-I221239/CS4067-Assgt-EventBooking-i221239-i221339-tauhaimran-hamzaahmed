@@ -92,22 +92,22 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.delete("/cancelbooking", async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
-        const { bookingId } = req.body;
+        const bookingId = req.params.id;
 
         if (!bookingId) {
             console.log("[Validation Error] Missing booking ID");
             return res.status(400).json({ error: "Missing booking ID" });
         }
 
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findByPk(bookingId);
         if (!booking) {
             console.log("[Not Found Error] Booking not found:", bookingId);
             return res.status(404).json({ error: "Booking not found" });
         }
 
-        await Booking.findByIdAndDelete(bookingId);
+        await booking.destroy();
         console.log("[DELETE] Booking deleted successfully:", bookingId);
         res.status(200).json({ message: "Booking deleted successfully" });
     } catch (error) {
@@ -116,22 +116,23 @@ router.delete("/cancelbooking", async (req, res) => {
     }
 });
 
-router.put("/updatebooking", async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
-        const { bookingId, numberOfTickets } = req.body;
+        const bookingId = req.params.id;
+        const { numTickets } = req.body;
 
-        if (!bookingId || !numberOfTickets) {
+        if (!numTickets) {
             console.log("[Validation Error] Missing required update fields");
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findByPk(bookingId);
         if (!booking) {
             console.log("[Not Found Error] Booking not found:", bookingId);
             return res.status(404).json({ error: "Booking not found" });
         }
 
-        booking.numberOfTickets = numberOfTickets;
+        booking.numTickets = numTickets;
         await booking.save();
 
         console.log("[PUT] Booking updated successfully:", bookingId);
