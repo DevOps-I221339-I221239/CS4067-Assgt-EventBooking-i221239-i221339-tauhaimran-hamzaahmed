@@ -90,7 +90,7 @@ The platform consists of four microservices:
 
 ### ✅ GitHub Integration
 ![GitHub Integration](docs/githubproject.jpg)
-![GitHub Integration](docs/githubprojec1.jpg)
+![GitHub Integration](docs/githubproject1.jpg)
 ![GitHub Integration](docs/githubproject2.jpg)
 ![GitHub Integration](docs/githubproject4.jpg)
 ![GitHub Integration](docs/githubproject3.jpg)
