@@ -1,7 +1,7 @@
 # 🎟️ Microservices-Based Online Event Booking Platform  
 
 ## 📌 Overview  
-This project is a **fully functional microservices-based event booking system**. It allows users to register, browse events, make bookings, and receive notifications. The system is built with **Node.js, Express, MongoDB/PostgreSQL, RabbitMQ, and Docker** and follows an **event-driven architecture**.
+This project is a **fully functional microservices-based event booking system**. It allows users to register, browse events, make bookings, and receive notifications. The system is built with **Node.js, Express, MongoDB/PostgreSQL, and RabbitMQ** and follows an **event-driven architecture**.
 
 ## 🏗️ Architecture  
 ![Microservices Architecture](./docs/architecture-diagram.png)  
@@ -27,17 +27,41 @@ The platform consists of four microservices:
 - **API Documentation:** Swagger/OpenAPI  
 
 ## 📂 Folder Structure  
-│── /event-service # Event Management Service
-    │── /models # Database setup and Schema
-    │── /Routes # Endpoints
-    │── Index.js # Server
-    (**NOTE:** Above structure remains consistent for each service)
-│── /booking-service # Booking & Reservations
-│── /notification-service # Email & Notifications
-|── /user-service # User Registration 
-    │──/user-frontend # UI
-│── README.md # Project documentation
+## 📂 Folder Structure  
+📦 event-booking-platform
+│── 📁 event-service (Event Management Service)
+│ ├── 📁 models (Database setup and schema)
+│ ├── 📁 routes (API Endpoints & Controllers)
+│ ├── 📄 index.js (Server entry point)
+│
+│── 📁 booking-service (Booking & Reservations Service)
+│ ├── 📁 models
+│ ├── 📁 routes
+│ ├── 📄 index.js
+│
+│── 📁 notification-service (Email & Notifications Service)
+│ ├── 📁 models
+│ ├── 📁 routes
+│ ├── 📄 index.js
+│
+│── 📁 user-service (User Registration & Authentication Service)
+│ ├── 📁 models
+│ ├── 📁 routes
+│ ├── 📁 user-frontend (React UI for users)
+│ ├── 📄 index.js
+│
+│── 📄 README.md (Project Documentation)
 
+
+### **📌 Notes**
+- **Each microservice has the same structure**:  
+  - `/models` → Defines database schema.  
+  - `/routes` → API endpoints & controllers.  
+  - `index.js` → Server entry point.  
+- **User Service has a frontend (`user-frontend`)**.  
+- **README.md** contains project documentation.  
+
+---
 ## 📜 API Endpoints for Event Booking Platform
 
 ### **🔹 User Service (`/users`)**  
