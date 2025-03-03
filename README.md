@@ -21,7 +21,7 @@ The platform consists of four microservices:
 
 ## 🛠️ Tech Stack  
 - **Backend:** Node.js, Express, Sequelize/Mongoose  
-- **Database:** PostgreSQL (User, Booking, Event) & MongoDB (Notifications)  
+- **Database:** PostgreSQL (User, Booking) & MongoDB (Notifications, Event)  
 - **Messaging Queue:** RabbitMQ  
 - **Authentication:** JWT  
 - **API Documentation:** Swagger/OpenAPI  
