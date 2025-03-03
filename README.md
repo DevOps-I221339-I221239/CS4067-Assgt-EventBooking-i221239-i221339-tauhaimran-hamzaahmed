@@ -27,7 +27,6 @@ The platform consists of four microservices:
 - **API Documentation:** Swagger/OpenAPI  
 
 ## 📂 Folder Structure  
-## 📂 Folder Structure  
 📦 event-booking-platform
 │── 📁 event-service (Event Management Service)
 │ ├── 📁 models (Database setup and schema)
