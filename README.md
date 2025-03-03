@@ -3,6 +3,16 @@
 ## 📌 Overview  
 This project is a **fully functional microservices-based event booking system**. It allows users to register, browse events, make bookings, and receive notifications. The system is built with **Node.js, Express, MongoDB/PostgreSQL, and RabbitMQ** and follows an **event-driven architecture**.
 
+## Links:
+### Jira : 
+https://tauhaimran.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJpIjoiYTI3OGU2ODE3MmZhNDJlMGJiMGE1ODgwYWFhY2EyOGMiLCJwIjoiaiJ9&authuser=0 
+### Github Repository:
+https://github.com/DevOps-I221339-I221239/CS4067-Assgt-EventBooking-i221239-i221339-tauhaimran-hamzaahmed?authuser=0 
+### Github Project:
+https://github.com/orgs/DevOps-I221339-I221239/projects/1?authuser=0 
+
+
+
 ## 🏗️ Architecture  
 ![Microservices Architecture](./docs/architecture-diagram.png)  
 
